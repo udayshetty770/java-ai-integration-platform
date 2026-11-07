@@ -12,6 +12,5 @@ target/
 # Local environment files and credentials
 .env
 .env.*
-!.env.example
 
 .DS_Store
