@@ -17,6 +17,6 @@ public class AiChatController {
 
     @PostMapping("/chat")
     public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
-        return new ChatResponse(aiChatService.ask(request.message()), "configured-provider");
+        return new ChatResponse(aiChatService.ask(request.message()), "OpenAI-compatible endpoint");
     }
 }
