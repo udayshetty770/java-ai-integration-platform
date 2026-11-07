@@ -1,6 +1,4 @@
 target/
-!.mvn/wrapper/maven-wrapper.jar
-.mvn/wrapper/maven-wrapper.properties
 .idea/
 .vscode/
 *.iml
@@ -8,9 +6,6 @@ target/
 .project
 .settings/
 *.log
-
-# Local environment files and credentials
 .env
 .env.*
-
 .DS_Store
