@@ -1,0 +1,27 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: java-ai-integration-platform
+  ai:
+    openai:
+      base-url: ${AI_BASE_URL:https://api.groq.com/openai}
+      api-key: ${AI_API_KEY:replace-me}
+      chat:
+        options:
+          model: ${AI_MODEL:llama-3.3-70b-versatile}
+          temperature: 0.3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+app:
+  ai:
+    max-message-length: 12000
