@@ -131,7 +131,3 @@ pom.xml
 ## Notes
 
 This repository currently implements text chat only. It does not include document upload, RAG, vector storage, authentication, or conversation persistence. The API key and a model supported by the configured provider are required for successful AI responses.
-
-## License
-
-MIT
