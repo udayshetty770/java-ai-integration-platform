@@ -7,7 +7,7 @@ spring:
   ai:
     openai:
       base-url: ${AI_BASE_URL:https://api.groq.com/openai}
-      api-key: ${AI_API_KEY:replace-me}
+      api-key: ${AI_API_KEY}
       chat:
         options:
           model: ${AI_MODEL:llama-3.3-70b-versatile}
@@ -21,7 +21,3 @@ management:
   endpoint:
     health:
       show-details: never
-
-app:
-  ai:
-    max-message-length: 12000
