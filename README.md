@@ -1,85 +1,66 @@
 # Java AI Integration Platform
 
-A small, extensible Spring Boot REST API that connects Java applications to Large Language Models through **Spring AI** and an OpenAI-compatible provider endpoint.
+A Spring Boot REST API that connects a Java application to a large language model through Spring AI. The application exposes a small HTTP interface and keeps provider configuration outside the source code.
 
-The default configuration targets Groq's OpenAI-compatible API. You can point it at another compatible endpoint by changing environment variables; the application code does not need provider-specific SDK calls.
+## What it does
 
-## Architecture
+- Accepts chat prompts through a REST endpoint.
+- Uses Spring AI's `ChatClient` to send prompts to an OpenAI-compatible chat-completions API.
+- Returns the model response as JSON.
+- Validates incoming requests and exposes an Actuator health endpoint.
 
-```mermaid
-flowchart LR
-    C[Client / REST Consumer] --> API[Spring Boot REST API]
-    API --> S[AI Chat Service]
-    S --> SA[Spring AI ChatClient]
-    SA --> LLM[LLM Provider<br/>Groq / OpenAI-compatible]
-    LLM --> SA
-    SA --> S
-    S --> API
-    API --> C
-```
+The default endpoint configuration is suitable for Groq's OpenAI-compatible API. Other compatible providers can be configured with environment variables.
 
-### Request flow
-
-1. A client sends a JSON request to the REST controller.
-2. Jakarta Bean Validation checks the request.
-3. The service calls Spring AI's `ChatClient`.
-4. Spring AI communicates with the configured model provider.
-5. The API returns the generated answer as JSON.
-
-## Technology stack
-
-- Java 17
-- Spring Boot 3.4
-- Spring AI
-- Maven
-- REST APIs
-- Jakarta Bean Validation
-- Spring Boot Actuator
-
-## Prerequisites
+## Requirements
 
 - JDK 17 or newer
-- Maven 3.9+
-- An API key for the configured AI provider
+- Maven 3.9 or newer
+- An API key for your selected model provider
 
-## Run locally
+## Configuration
 
-Set the provider configuration in your shell:
+Set these environment variables before starting the application:
 
-```bash
-export AI_API_KEY="your-api-key"
-export AI_BASE_URL="https://api.groq.com/openai"
-export AI_MODEL="llama-3.3-70b-versatile"
-```
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `AI_API_KEY` | Yes | — | API key for the model provider |
+| `AI_BASE_URL` | No | `https://api.groq.com/openai` | OpenAI-compatible API base URL |
+| `AI_MODEL` | No | `llama-3.3-70b-versatile` | Model name supported by your provider |
+| `SERVER_PORT` | No | `8080` | HTTP server port |
 
-On PowerShell:
+Never commit API keys. Supply them through your shell, deployment environment, or a secrets manager.
+
+### PowerShell
 
 ```powershell
 $env:AI_API_KEY = "your-api-key"
 $env:AI_BASE_URL = "https://api.groq.com/openai"
 $env:AI_MODEL = "llama-3.3-70b-versatile"
-```
-
-Start the application:
-
-```bash
 mvn spring-boot:run
 ```
 
-The API starts at `http://localhost:8080`.
+### macOS / Linux
+
+```bash
+export AI_API_KEY="your-api-key"
+export AI_BASE_URL="https://api.groq.com/openai"
+export AI_MODEL="llama-3.3-70b-versatile"
+mvn spring-boot:run
+```
+
+The service listens on `http://localhost:8080` unless `SERVER_PORT` is changed.
 
 ## API
 
-### POST /api/v1/ai/chat
+### Send a chat prompt
+
+`POST /api/v1/ai/chat`
 
 Request:
 
-```http
-POST http://localhost:8080/api/v1/ai/chat
-Content-Type: application/json
-
+```json
 {
-  "message": "Explain how a Java application communicates with an LLM."
+  "message": "Explain dependency injection in Spring Boot."
 }
 ```
 
@@ -87,47 +68,69 @@ Example response:
 
 ```json
 {
-  "answer": "A Java application can call an LLM through an integration layer...",
-  "modelProvider": "configured-provider"
+  "answer": "Dependency injection is a design technique ...",
+  "modelProvider": "OpenAI-compatible endpoint"
 }
+```
+
+Example using curl:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/ai/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Explain dependency injection in Spring Boot."}'
 ```
 
 ### Health check
 
-```http
-GET http://localhost:8080/actuator/health
-```
+`GET /actuator/health`
 
-## Configuration
-
-| Environment variable | Default | Purpose |
-|---|---|---|
-| `AI_API_KEY` | replace-me | Provider API key |
-| `AI_BASE_URL` | Groq-compatible URL | OpenAI-compatible API base URL |
-| `AI_MODEL` | llama-3.3-70b-versatile | Model identifier |
-| `SERVER_PORT` | 8080 | HTTP port |
-
-Never commit real API keys. Use environment variables or a secrets manager in deployed environments.
-
-## Project structure
+## Request flow
 
 ```text
-src/main/java/dev/udayshetty/aiplatform/
-├── api/
-│   ├── AiChatController.java
-│   ├── ApiExceptionHandler.java
-│   ├── ChatRequest.java
-│   └── ChatResponse.java
-├── service/
-│   └── AiChatService.java
-└── JavaAiIntegrationApplication.java
-src/main/resources/application.yml
-src/test/java/
+HTTP client
+    |
+    v
+AiChatController
+    |
+    v
+AiChatService
+    |
+    v
+Spring AI ChatClient
+    |
+    v
+Configured model provider
+    |
+    v
+JSON response
 ```
 
-## Current scope and next steps
+## Build and test
 
-This repository is a starter integration demonstrating the REST-to-LLM request path. It does not yet implement document ingestion, embeddings, retrieval-augmented generation (RAG), authentication, rate limiting, or persistent conversation history. Those are natural extensions for a production-oriented system.
+```bash
+mvn clean verify
+```
+
+## Project layout
+
+```text
+src/
+  main/
+    java/dev/udayshetty/aiplatform/
+      api/          REST controller and request/response models
+      service/      AI interaction logic
+      JavaAiIntegrationApplication.java
+    resources/
+      application.yml
+  test/
+    java/           Request validation tests
+pom.xml
+```
+
+## Notes
+
+This repository currently implements text chat only. It does not include document upload, RAG, vector storage, authentication, or conversation persistence. The API key and a model supported by the configured provider are required for successful AI responses.
 
 ## License
 
